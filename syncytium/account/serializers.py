@@ -1,8 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from .models import (
+    UserProfile,
+    UserPrivacy,
+    UserAddress,
+    UserEducation,
+    UserWorkExperience,
+)
 from django.contrib.auth.password_validation import (
     validate_password as validate_password_django,
 )
+from core.utils import validate_country_and_city
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,3 +49,115 @@ class UserSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=email).exists():
             raise serializers.ValidationError("Email is already in use")
         return email
+
+
+class UserPrivacySerializer(serializers.ModelSerializer):
+    """
+    User privacy serializer
+    """
+
+    class Meta:
+        model = UserPrivacy
+        fields = [
+            "id",
+            "user",
+            "profile",
+            "address",
+            "education",
+            "work_experience",
+        ]
+        extra_kwargs = {
+            "user": {"read_only": True},
+        }
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    User profile serializer
+    """
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "id",
+            "user",
+            "bio",
+            "birth_date",
+            "website",
+            "phone",
+            "avatar",
+        ]
+        extra_kwargs = {
+            "user": {"read_only": True},
+        }
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+    """
+    User address serializer
+    """
+
+    class Meta:
+        model = UserAddress
+        fields = [
+            "id",
+            "user",
+            "country",
+            "city",
+        ]
+        extra_kwargs = {
+            "user": {"read_only": True},
+        }
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        city = attrs.get("city")
+        country = attrs.get("country")
+        if city:
+            country, city = validate_country_and_city(country, city)
+        attrs["country"] = country
+        attrs["city"] = city
+        return attrs
+
+
+class UserEducationSerializer(serializers.ModelSerializer):
+    """
+    User education serializer
+    """
+
+    class Meta:
+        model = UserEducation
+        fields = [
+            "id",
+            "user",
+            "school",
+            "degree",
+            "field_of_study",
+            "start_date",
+            "end_date",
+            "description",
+        ]
+        extra_kwargs = {
+            "user": {"read_only": True},
+        }
+
+
+class UserWorkExperienceSerializer(serializers.ModelSerializer):
+    """
+    User work experience serializer
+    """
+
+    class Meta:
+        model = UserWorkExperience
+        fields = [
+            "id",
+            "user",
+            "company",
+            "position",
+            "start_date",
+            "end_date",
+            "description",
+        ]
+        extra_kwargs = {
+            "user": {"read_only": True},
+        }

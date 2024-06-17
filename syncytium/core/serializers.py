@@ -12,16 +12,6 @@ class CountrySerializer(ModelSerializer):
         fields = ["id", "name"]
 
 
-class RegionSerializer(ModelSerializer):
-    """
-    Serializer for the Region model.
-    """
-
-    class Meta:
-        model = Region
-        fields = ["id", "name"]
-
-
 class CitySerializer(ModelSerializer):
     """
     Serializer for the City model.

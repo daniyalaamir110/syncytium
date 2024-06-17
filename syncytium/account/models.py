@@ -66,9 +66,6 @@ class UserAddress(TimeStampedModel):
     country = models.ForeignKey(
         "cities_light.Country", on_delete=models.SET_NULL, null=True, blank=True
     )
-    region = models.ForeignKey(
-        "cities_light.Region", on_delete=models.SET_NULL, null=True, blank=True
-    )
     city = models.ForeignKey(
         "cities_light.City", on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -77,7 +74,7 @@ class UserAddress(TimeStampedModel):
         verbose_name_plural = "User addresses"
 
     def __str__(self):
-        return f"{self.user.username} lives in {self.city.name}, {self.region.name}, {self.country.name}"
+        return f"{self.user.username} lives in {self.city.name}, {self.country.name}"
 
 
 class UserEducation(TimeStampedModel):
