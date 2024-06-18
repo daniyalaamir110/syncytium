@@ -1,9 +1,9 @@
+from core.models import Privacy, TimeStampedModel
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import F
-from django.db.models.functions import Now, Greatest, ExtractSecond
-from core.models import TimeStampedModel, Privacy
-from django.contrib.auth import get_user_model
-from datetime import timedelta
+from django.db.models.functions import ExtractSecond, Greatest, Now
+from django.utils import timezone
 
 User = get_user_model()
 

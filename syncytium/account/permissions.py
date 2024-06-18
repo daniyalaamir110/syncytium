@@ -1,7 +1,8 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
-from rest_framework.exceptions import PermissionDenied
-from .models import UserPrivacy
 from core.models import Privacy
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import SAFE_METHODS, BasePermission
+
+from .models import UserPrivacy
 
 
 def get_privacy(username, field):

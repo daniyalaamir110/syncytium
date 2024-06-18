@@ -1,14 +1,14 @@
+from core.models import Privacy
+from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.permissions import SAFE_METHODS
+
 from .models import (
-    UserProfile,
-    UserPrivacy,
     UserAddress,
     UserEducation,
+    UserPrivacy,
+    UserProfile,
     UserWorkExperience,
 )
-from core.models import Privacy
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.exceptions import NotFound
-from rest_framework.permissions import SAFE_METHODS
 
 
 class DetailMustBeCurrentUserAPIMixin:

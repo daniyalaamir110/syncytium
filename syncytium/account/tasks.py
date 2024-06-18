@@ -1,12 +1,14 @@
 from celery import shared_task
 from core.utils import send_email
-from .utils import generate_email_verification_token
-from django.contrib.auth import get_user_model
 from decouple import config
+from django.contrib.auth import get_user_model
+
+from .utils import generate_email_verification_token
 
 User = get_user_model()
 
 FRONTEND_APP_URL = config("FRONTEND_APP_URL", "http://localhost:3000")
+BACKEND_APP_URL = config("BACKEND_APP_URL", "http://localhost:8000")
 
 
 @shared_task
@@ -32,7 +34,7 @@ def send_email_verification_link_email(user_id, is_new=False):
         print("Email verification link email not sent. User not found.")
         return
     token = generate_email_verification_token(user_id)
-    verification_link = f"{FRONTEND_APP_URL}/verify-email?token={token}"
+    verification_link = f"{BACKEND_APP_URL}/account/verify-email/{token}/"
     subject = "Verify your email address"
     if is_new:
         message = (

@@ -1,4 +1,5 @@
 from secrets import token_hex
+
 from .models import UserEmailStatus
 
 

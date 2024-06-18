@@ -1,16 +1,17 @@
-from rest_framework import serializers
+from core.utils import validate_country_and_city
 from django.contrib.auth import get_user_model
-from .models import (
-    UserProfile,
-    UserPrivacy,
-    UserAddress,
-    UserEducation,
-    UserWorkExperience,
-)
 from django.contrib.auth.password_validation import (
     validate_password as validate_password_django,
 )
-from core.utils import validate_country_and_city
+from rest_framework import serializers
+
+from .models import (
+    UserAddress,
+    UserEducation,
+    UserPrivacy,
+    UserProfile,
+    UserWorkExperience,
+)
 
 User = get_user_model()
 
