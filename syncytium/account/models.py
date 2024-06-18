@@ -1,6 +1,16 @@
 from django.db import models
+from django.db.models import F
+from django.db.models.functions import Now, Greatest, ExtractSecond
 from core.models import TimeStampedModel, Privacy
-from django.conf.global_settings import AUTH_USER_MODEL
+from django.contrib.auth import get_user_model
+from datetime import timedelta
+
+User = get_user_model()
+
+# Make email field unique, blank and null fields false
+User._meta.get_field("email")._unique = True
+User._meta.get_field("email").blank = False
+User._meta.get_field("email").null = False
 
 
 class UserPrivacy(TimeStampedModel):
@@ -10,9 +20,7 @@ class UserPrivacy(TimeStampedModel):
     field to the default Django user model.
     """
 
-    user = models.OneToOneField(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="privacy"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="privacy")
     profile = models.CharField(
         choices=Privacy.choices, default=Privacy.PUBLIC, max_length=2
     )
@@ -33,6 +41,48 @@ class UserPrivacy(TimeStampedModel):
         return f"{self.user.username} privacy settings"
 
 
+EMAIL_TOKEN_VALIDITY = 1
+
+
+class UserEmailStatus(TimeStampedModel):
+    """
+    This model stores the user email status.
+    Initially, it only contains the user field, which is a one-to-one
+    field to the default Django user model.
+    """
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="email_status"
+    )
+    is_verified = models.BooleanField(default=False)
+    verification_token = models.CharField(max_length=32, blank=True)
+
+    @property
+    def is_valid(self):
+        """
+        Check if the email status is valid.
+        Used token is always invalid.
+        Only the last token is be valid, if not verified.
+        """
+        if self.is_verified:
+            return False
+        last_email_status = (
+            UserEmailStatus.objects.filter(user=self.user).order_by("-created").first()
+        )
+        if self.id == last_email_status.id:
+            created = self.created
+            now = timezone.now()
+            if (now - created).days < EMAIL_TOKEN_VALIDITY:
+                return True
+        return False
+
+    def __str__(self):
+        return f"{self.user.username} email status"
+
+    class Meta:
+        verbose_name_plural = "User email statuses"
+
+
 class UserProfile(TimeStampedModel):
     """
     This model extends the default Django user model.
@@ -40,9 +90,7 @@ class UserProfile(TimeStampedModel):
     field to the default Django user model.
     """
 
-    user = models.OneToOneField(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     bio = models.TextField(blank=True)
     birth_date = models.DateField(null=True, blank=True, verbose_name="Date of birth")
     website = models.URLField(blank=True)
@@ -60,9 +108,7 @@ class UserAddress(TimeStampedModel):
     field to the default Django user model.
     """
 
-    user = models.OneToOneField(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="address"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="address")
     country = models.ForeignKey(
         "cities_light.Country", on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -84,9 +130,7 @@ class UserEducation(TimeStampedModel):
     field to the default Django user model.
     """
 
-    user = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="educations"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="educations")
     school = models.CharField(max_length=255)
     degree = models.CharField(max_length=255)
     field_of_study = models.CharField(max_length=255, verbose_name="Field of study")
@@ -106,7 +150,7 @@ class UserWorkExperience(TimeStampedModel):
     """
 
     user = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="work_experiences"
+        User, on_delete=models.CASCADE, related_name="work_experiences"
     )
     company = models.CharField(max_length=255)
     position = models.CharField(max_length=255)

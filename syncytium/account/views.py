@@ -18,6 +18,7 @@ from .models import (
 from .mixins import MustExistForUsernameAPIMixin
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsCurrentUserOrReadOnlyPermission, CheckPrivacyPermission
+from .tasks import send_registration_email, send_email_verification_link_email
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -33,7 +34,8 @@ class UserCreateAPIView(CreateAPIView):
         user = serializer.instance
         user.set_password(password)
         user.save()
-        UserPrivacy.objects.create(user=user)
+        send_registration_email.delay(user.id)
+        send_email_verification_link_email.delay(user.id, is_new=True)
         return user
 
 
