@@ -1,8 +1,9 @@
-from rest_framework.generics import ListAPIView
-from .serializers import CountrySerializer, CitySerializer
-from cities_light.models import Country, City
+from cities_light.models import City, Country
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
+
 from .paginators import CustomLimitOffsetPagination
+from .serializers import CitySerializer, CountrySerializer
 
 
 class CountryListAPIView(ListAPIView):

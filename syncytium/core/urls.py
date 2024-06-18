@@ -1,5 +1,6 @@
 from django.urls import path, re_path
-from .views import CountryListAPIView, CityListAPIView
+
+from .views import CityListAPIView, CountryListAPIView
 
 urlpatterns = [
     path("country/", CountryListAPIView.as_view(), name="countries"),

@@ -2,6 +2,7 @@ from django.urls import path, re_path
 
 from .views import (
     UserAddressAPIView,
+    UserChangeEmailAPIView,
     UserCreateAPIView,
     UserEducationViewSet,
     UserPrivacyAPIView,
@@ -24,6 +25,11 @@ urlpatterns = [
         r"verify-email/(?P<token>[\w.@+-]+)/$",
         verify_email,
         name="verify_email",
+    ),
+    re_path(
+        r"(?P<username>[\w.@+-]+)/change-email/$",
+        UserChangeEmailAPIView.as_view(),
+        name="change_email",
     ),
     re_path(
         r"(?P<username>[\w.@+-]+)/privacy/$",

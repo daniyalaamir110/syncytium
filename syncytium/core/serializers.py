@@ -1,5 +1,5 @@
+from cities_light.models import City, Country, Region
 from rest_framework.serializers import ModelSerializer
-from cities_light.models import Country, Region, City
 
 
 class CountrySerializer(ModelSerializer):

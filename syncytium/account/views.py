@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
@@ -21,6 +22,7 @@ from .permissions import (
     IsCurrentUserPermission,
 )
 from .serializers import (
+    ChangeEmailSerializer,
     UserAddressSerializer,
     UserEducationSerializer,
     UserPrivacySerializer,
@@ -80,28 +82,35 @@ def verify_email(request, token):
 
     email_status = UserEmailStatus.objects.filter(verification_token=token).first()
     if not email_status:
-        return Response({"detail": "Invalid link"}, status=HTTP_400_BAD_REQUEST)
-    user = email_status.user
-    last_email_status = (
-        UserEmailStatus.objects.filter(user=user).order_by("-created").first()
-    )
-    if email_status.id != last_email_status.id:
-        return Response(
-            {"detail": "This is an old link, please open the newest link"},
-            status=HTTP_400_BAD_REQUEST,
-        )
-    if last_email_status.is_verified:
-        return Response(
-            {"detail": "Email is already verified."}, status=HTTP_400_BAD_REQUEST
-        )
-    if not email_status.is_valid:
-        return Response(
-            {"detail": "This link has been expired. Please get a new one"},
-            status=HTTP_400_BAD_REQUEST,
-        )
-    email_status.is_verified = True
-    email_status.save()
-    return Response({"detail": "Email verified successfully."}, status=HTTP_200_OK)
+        detail = "Invalid link"
+    elif email_status.is_verified:
+        detail = "Email is already verified."
+    elif not email_status.is_valid:
+        detail = "Link expired. Please generate a new link."
+    else:
+        detail = "Email verified successfully."
+        email_status.is_verified = True
+        email_status.save()
+    return render(request, "account/verify_email.html", {"detail": detail})
+
+
+class UserChangeEmailAPIView(UpdateAPIView):
+    """
+    API view to change user email.
+    """
+
+    serializer_class = ChangeEmailSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, IsCurrentUserPermission]
+
+    def get_object(self):
+        return self.request.user
+
+    def perform_update(self, serializer):
+        user = serializer.instance
+        super().perform_update(serializer)
+        send_email_verification_link_email.delay(user.id)
+        return user
 
 
 class UserProfileAPIView(RetrieveUpdateAPIView):

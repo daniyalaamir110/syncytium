@@ -49,6 +49,27 @@ class UserSerializer(serializers.ModelSerializer):
         return password
 
 
+class ChangeEmailSerializer(serializers.ModelSerializer):
+    """
+    Change email serializer
+    """
+
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ["email"]
+        extra_kwargs = {
+            "email": {"required": True},
+        }
+
+    def validate_email(self, email):
+        user = self.context["request"].user
+        if user.email == email:
+            raise serializers.ValidationError("Email is already the same.")
+        return email
+
+
 class UserPrivacySerializer(serializers.ModelSerializer):
     """
     User privacy serializer
