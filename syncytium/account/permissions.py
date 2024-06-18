@@ -12,7 +12,7 @@ def get_privacy(username, field):
     provided field.
     - If the privacy settings are not found, assume public access.
 
-    Returns: `Privacy.PRIVATE` | `Privacy.PUBLIC` | `Privacy.FRIENDS
+    Returns: `Privacy.PRIVATE` | `Privacy.PUBLIC` | `Privacy.FRIENDS`
     """
     privacy = UserPrivacy.objects.filter(user__username=username).first()
     if privacy:
@@ -61,7 +61,6 @@ class CheckPrivacyPermission(BasePermission):
 
         if request.method not in SAFE_METHODS:
             return True
-
         username = view.kwargs.get("username")
         current_user = request.user
         is_current_user = current_user.username == username

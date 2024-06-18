@@ -102,6 +102,7 @@ class UserChangeEmailAPIView(UpdateAPIView):
     serializer_class = ChangeEmailSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsCurrentUserPermission]
+    http_method_names = ["put"]
 
     def get_object(self):
         return self.request.user
