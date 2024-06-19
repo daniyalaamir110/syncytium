@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from .views import CurrentUserRetrieveAPIView
+from .views import CurrentUserRetrieveAPIView, GoogleLoginAPIView
 
 app_name = "authentication"
 
@@ -13,6 +13,7 @@ password_reset = include("django_rest_passwordreset.urls", namespace="password_r
 
 urlpatterns = [
     path("login/", TokenObtainPairView.as_view(), name="login"),
+    path("login/google/", GoogleLoginAPIView.as_view(), name="google"),
     path("refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("verify/", TokenVerifyView.as_view(), name="verify"),
     path("me/", CurrentUserRetrieveAPIView.as_view(), name="me"),

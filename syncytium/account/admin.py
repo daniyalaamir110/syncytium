@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    User,
     UserAddress,
     UserEducation,
     UserEmailStatus,
@@ -9,6 +10,7 @@ from .models import (
     UserWorkExperience,
 )
 
+admin.site.register(User)
 admin.site.register(UserAddress)
 admin.site.register(UserEducation)
 admin.site.register(UserPrivacy)

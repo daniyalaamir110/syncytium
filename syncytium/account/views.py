@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .mixins import MustExistForUsernameAPIMixin
 from .models import (
+    RegistrationMethod,
     UserAddress,
     UserEducation,
     UserEmailStatus,
@@ -109,6 +110,11 @@ class UserChangeEmailAPIView(UpdateAPIView):
 
     def perform_update(self, serializer):
         user = serializer.instance
+        if user.registration_method == RegistrationMethod.GOOGLE:
+            return Response(
+                {"detail": "Email cannot be changed for Google registered users."},
+                status=HTTP_400_BAD_REQUEST,
+            )
         super().perform_update(serializer)
         send_email_verification_link_email.delay(user.id)
         return user
