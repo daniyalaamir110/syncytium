@@ -1,16 +1,29 @@
 from core.models import Privacy, TimeStampedModel
+from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import F
-from django.db.models.functions import ExtractSecond, Greatest, Now
 from django.utils import timezone
 
-User = get_user_model()
 
-# Make email field unique, blank and null fields false
-User._meta.get_field("email")._unique = True
-User._meta.get_field("email").blank = False
-User._meta.get_field("email").null = False
+class RegistrationMethod(models.TextChoices):
+    EMAIL = "EM", "Email"
+    GOOGLE = "GO", "Google"
+
+
+class User(AbstractUser):
+    """
+    This model extends the default Django user model.
+    """
+
+    email = models.EmailField(unique=True, blank=False, null=False)
+    registration_method = models.CharField(
+        choices=RegistrationMethod.choices,
+        default=RegistrationMethod.EMAIL,
+        max_length=2,
+    )
+
+    def __str__(self):
+        return self.username
 
 
 class UserPrivacy(TimeStampedModel):
