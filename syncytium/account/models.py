@@ -6,13 +6,18 @@ from django.utils import timezone
 
 
 class RegistrationMethod(models.TextChoices):
+    """Choices for the registration method"""
     EMAIL = "EM", "Email"
     GOOGLE = "GO", "Google"
 
 
 class User(AbstractUser):
     """
-    This model extends the default Django user model.
+    This model extends the default Django user model
+    
+    Details:
+    - Overrides the email field and sets it as unique.
+    - Adds a registration method field. 
     """
 
     email = models.EmailField(unique=True, blank=False, null=False)
@@ -29,6 +34,7 @@ class User(AbstractUser):
 class UserPrivacy(TimeStampedModel):
     """
     This model stores the user privacy settings.
+
     Initially, it only contains the user field, which is a one-to-one
     field to the default Django user model.
     """
@@ -60,6 +66,7 @@ EMAIL_TOKEN_VALIDITY = 1
 class UserEmailStatus(TimeStampedModel):
     """
     This model stores the user email status.
+
     Initially, it only contains the user field, which is a one-to-one
     field to the default Django user model.
     """
@@ -74,15 +81,15 @@ class UserEmailStatus(TimeStampedModel):
     def is_valid(self):
         """
         Check if the email status is valid.
-        Used token is always invalid.
-        Only the last token is be valid, if not verified.
+        
+        Operations:
+        - Token is invalid if already verified.
+        - Token is invalid if it is expired.
+
+        Returns:
+            `bool`: `True` if the token is valid, `False` otherwise.
         """
-        if self.is_verified:
-            return False
-        last_email_status = (
-            UserEmailStatus.objects.filter(user=self.user).order_by("-created").first()
-        )
-        if self.id == last_email_status.id:
+        if not self.is_verified:        
             created = self.created
             now = timezone.now()
             if (now - created).days < EMAIL_TOKEN_VALIDITY:
@@ -97,6 +104,7 @@ class UserEmailStatus(TimeStampedModel):
 
 
 class Gender(models.TextChoices):
+    """Choices for user's gender"""
     MALE = "M", "Male"
     FEMALE = "F", "Female"
     OTHER = "O", "Other"
@@ -104,7 +112,8 @@ class Gender(models.TextChoices):
 
 class UserProfile(TimeStampedModel):
     """
-    This model extends the default Django user model.
+    This model stores the user profile information
+    
     Initially, it only contains the user field, which is a one-to-one
     field to the default Django user model.
     """
@@ -124,6 +133,7 @@ class UserProfile(TimeStampedModel):
 class UserAddress(TimeStampedModel):
     """
     This model stores the user address.
+
     Initially, it only contains the user field, which is a one-to-one
     field to the default Django user model.
     """
@@ -146,6 +156,7 @@ class UserAddress(TimeStampedModel):
 class UserEducation(TimeStampedModel):
     """
     This model stores the user education information.
+    
     Initially, it only contains the user field, which is a one-to-one
     field to the default Django user model.
     """
@@ -165,6 +176,7 @@ class UserEducation(TimeStampedModel):
 class UserWorkExperience(TimeStampedModel):
     """
     This model stores the user work experience information.
+    
     Initially, it only contains the user field, which is a one-to-one
     field to the default Django user model.
     """

@@ -8,11 +8,14 @@ from .models import UserPrivacy
 def get_privacy(username, field):
     """
     Get the privacy settings for the user and field.
-    - Filter the privacy settings by the user's username, and return the value of the
-    provided field.
+    
+    Operations:
+    - Filter the privacy settings by the user's username, and return the 
+    value of the provided field.
     - If the privacy settings are not found, assume public access.
 
-    Returns: `Privacy.PRIVATE` | `Privacy.PUBLIC` | `Privacy.FRIENDS`
+    Returns: 
+        `str`: `"PR" | "PU" | "FR"`
     """
     privacy = UserPrivacy.objects.filter(user__username=username).first()
     if privacy:
@@ -22,7 +25,8 @@ def get_privacy(username, field):
 
 class IsCurrentUserPermission(BasePermission):
     """
-    Permission class to check if the current user is the same as the user in the URL.
+    Permission class to check if the current user is the same as the user 
+    in the URL.
     """
 
     def has_permission(self, request, view):
@@ -36,8 +40,8 @@ class IsCurrentUserPermission(BasePermission):
 
 class IsCurrentUserOrReadOnlyPermission(IsCurrentUserPermission):
     """
-    Permission class to check if the current user is the same as the user in the URL.
-    If the user is not the same, only allow read-only methods.
+    Permission class to check if the current user is the same as the user 
+    in the URL. If the user is not the same, only allow read-only methods.
     """
 
     def has_permission(self, request, view):
@@ -48,7 +52,10 @@ class IsCurrentUserOrReadOnlyPermission(IsCurrentUserPermission):
 
 class CheckPrivacyPermission(BasePermission):
     """
-    Only applies to read-only methods. For write methods, it is always `True`.
+    Permission class to check the privacy settings for a user.
+    
+    Operations:
+    - Only applies to read-only methods. For write methods, it is always `True`.
     - The `privacy_field` attribute must be defined in the view.
     - If the current user is the same as the user in the URL, allow access.
     - If the privacy settings are public, allow access.
@@ -58,7 +65,6 @@ class CheckPrivacyPermission(BasePermission):
     """
 
     def has_permission(self, request, view):
-
         if request.method not in SAFE_METHODS:
             return True
         username = view.kwargs.get("username")
