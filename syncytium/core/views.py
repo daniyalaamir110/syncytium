@@ -7,10 +7,7 @@ from .serializers import CitySerializer, CountrySerializer
 
 
 class CountryListAPIView(ListAPIView):
-    """
-    API view to list all countries.
-    """
-
+    """API view to list all countries"""
     serializer_class = CountrySerializer
     search_fields = ["name"]
     filter_backends = [SearchFilter]
@@ -19,10 +16,7 @@ class CountryListAPIView(ListAPIView):
 
 
 class CityListAPIView(ListAPIView):
-    """
-    API view to list all cities.
-    """
-
+    """API view to list all cities"""
     serializer_class = CitySerializer
     search_fields = ["name"]
     filter_backends = [SearchFilter]

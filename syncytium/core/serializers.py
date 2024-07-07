@@ -3,9 +3,7 @@ from rest_framework.serializers import ModelSerializer
 
 
 class CountrySerializer(ModelSerializer):
-    """
-    Serializer for the Country model.
-    """
+    """Serializer for the Country model"""
 
     class Meta:
         model = Country
@@ -13,9 +11,7 @@ class CountrySerializer(ModelSerializer):
 
 
 class CitySerializer(ModelSerializer):
-    """
-    Serializer for the City model.
-    """
+    """Serializer for the City model"""
 
     class Meta:
         model = City

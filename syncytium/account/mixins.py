@@ -3,9 +3,12 @@ from rest_framework.permissions import SAFE_METHODS
 
 
 class MustExistForUsernameAPIMixin:
-    """
-    Mixin to check if the detail object exists.
+    """Check if the detail object exists.
+
+    Preconditions:
     - The `model` attribute must be defined in the view.
+    
+    Operations:
     - In case of read-only methods, if the object does not exist, raise a 404 error.
     - In case of write methods, if the object does not exist, create it if `create` is `True`.
     """

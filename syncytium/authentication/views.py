@@ -5,6 +5,7 @@ from account.serializers import UserSerializer
 from account.tasks import send_registration_email
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
@@ -26,10 +27,7 @@ User = get_user_model()
 
 
 class CurrentUserRetrieveAPIView(RetrieveAPIView):
-    """
-    API view to retrieve the current user.
-    """
-
+    """API view to retrieve the current user"""
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
 
@@ -40,10 +38,7 @@ class CurrentUserRetrieveAPIView(RetrieveAPIView):
 
 
 class GoogleLoginAPIView(APIView, ApiErrorsMixin, PublicApiMixin):
-    """
-    API view to login with Google.
-    """
-
+    """API view to login with Google OAuth2"""
     @extend_schema(
         parameters=[
             OpenApiParameter(name="code", type=str),
@@ -68,19 +63,9 @@ class GoogleLoginAPIView(APIView, ApiErrorsMixin, PublicApiMixin):
 
         try:
             access_token = GoogleOAuthUtils.get_access_token(code, redirect_uri)
-        except:
-            return Response(
-                {"detail": "Could not get access token from Google."},
-                HTTP_400_BAD_REQUEST,
-            )
-
-        try:
             user_data = GoogleOAuthUtils.get_user_info(access_token)
-        except:
-            return Response(
-                {"detail": "Could not get user info from Google."},
-                HTTP_400_BAD_REQUEST,
-            )
+        except ValidationError as e:
+            return Response({"detail": str(e)}, HTTP_400_BAD_REQUEST)
 
         email = user_data["email"]
         user = User.objects.filter(email=email).first()
@@ -100,14 +85,8 @@ class GoogleLoginAPIView(APIView, ApiErrorsMixin, PublicApiMixin):
             send_registration_email.delay(user.id)
 
         elif user.registration_method != RegistrationMethod.GOOGLE:
-            return Response(
-                {"detail": "Please login with password."},
-                HTTP_400_BAD_REQUEST,
-            )
+            return Response({"detail": "Please login with password."}, HTTP_400_BAD_REQUEST)
 
         access_token, refresh_token = generate_tokens_for_user(user)
-        response_data = {
-            "access_token": str(access_token),
-            "refresh_token": str(refresh_token),
-        }
+        response_data = dict(access_token=access_token, refresh_token=refresh_token)
         return Response(response_data)

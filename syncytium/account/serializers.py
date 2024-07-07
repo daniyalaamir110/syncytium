@@ -17,9 +17,7 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    User create serializer
-    """
+    """User create serializer"""
 
     password = serializers.CharField(
         write_only=True,
@@ -27,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         max_length=20,
     )
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -34,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "first_name",
             "last_name",
+            "full_name",
             "username",
             "email",
             "password",
@@ -42,17 +42,19 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name": {"required": True},
             "last_name": {"required": True},
             "email": {"required": True},
+            "full_name": {"read_only": True},
         }
 
     def validate_password(self, password):
         validate_password_django(password)
         return password
 
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip()
+
 
 class ChangeEmailSerializer(serializers.ModelSerializer):
-    """
-    Change email serializer
-    """
+    """Change email serializer"""
 
     email = serializers.EmailField(required=True)
 
@@ -71,9 +73,7 @@ class ChangeEmailSerializer(serializers.ModelSerializer):
 
 
 class UserPrivacySerializer(serializers.ModelSerializer):
-    """
-    User privacy serializer
-    """
+    """User privacy serializer"""
 
     class Meta:
         model = UserPrivacy
@@ -91,9 +91,7 @@ class UserPrivacySerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """
-    User profile serializer
-    """
+    """User profile serializer"""
 
     class Meta:
         model = UserProfile
@@ -112,9 +110,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserAddressSerializer(serializers.ModelSerializer):
-    """
-    User address serializer
-    """
+    """User address serializer"""
 
     class Meta:
         model = UserAddress
@@ -140,9 +136,7 @@ class UserAddressSerializer(serializers.ModelSerializer):
 
 
 class UserEducationSerializer(serializers.ModelSerializer):
-    """
-    User education serializer
-    """
+    """User education serializer"""
 
     class Meta:
         model = UserEducation
@@ -162,9 +156,7 @@ class UserEducationSerializer(serializers.ModelSerializer):
 
 
 class UserWorkExperienceSerializer(serializers.ModelSerializer):
-    """
-    User work experience serializer
-    """
+    """User work experience serializer"""
 
     class Meta:
         model = UserWorkExperience

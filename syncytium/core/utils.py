@@ -4,9 +4,18 @@ from django.core.mail import send_mail
 
 
 def validate_country_and_city(country, city):
-    """
-    Validate country and city.
-    Check if the city belongs to the country.
+    """Validate country and city.
+
+    Operations:
+    - If the country is not provided, use the country of the city.
+    - If country is provided, check if the city belongs to the country.
+
+    Args:
+        `country` (`Country`): Country object.
+        `city` (`City`): City object.
+    
+    Returns:
+        `Country`, `City`: Country and City objects.
     """
 
     if not country:
@@ -18,8 +27,20 @@ def validate_country_and_city(country, city):
 
 def send_email(subject="", message="", recipient_list=[]):
     """
-    Send email.
+    Utility function to send an email.
+
+    Operations:
+    - Use the default email host user as the sender.
+    - Send an email with the provided subject, message, and recipient list.
+
+    Args:
+        `subject` (`str`): Email subject.
+        `message` (`str`): Email message.
+        `recipient_list` (`list`): List of email recipients.
+    
+    Returns:
+        `int`: Number of emails sent.
     """
     from_email = settings.EMAIL_HOST_USER
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-    return True
+    sent = send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+    return sent

@@ -37,10 +37,7 @@ User = get_user_model()
 
 
 class UserCreateAPIView(CreateAPIView):
-    """
-    API view to create a new user.
-    """
-
+    """API view to create a new user"""
     serializer_class = UserSerializer
 
     def perform_create(self, serializer):
@@ -57,10 +54,7 @@ class UserCreateAPIView(CreateAPIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsCurrentUserPermission])
 def get_email_token(request, username):
-    """
-    API view to get email token.
-    """
-
+    """API view to get email token"""
     user = User.objects.filter(username=username).select_related("email_status").first()
     if not user:
         return Response({"detail": "User not found."}, status=HTTP_404_NOT_FOUND)
@@ -77,10 +71,7 @@ def get_email_token(request, username):
 
 @api_view(["GET"])
 def verify_email(request, token):
-    """
-    API view to verify email.
-    """
-
+    """API view to verify email"""
     email_status = UserEmailStatus.objects.filter(verification_token=token).first()
     if not email_status:
         detail = "Invalid link"
@@ -96,9 +87,7 @@ def verify_email(request, token):
 
 
 class UserChangeEmailAPIView(UpdateAPIView):
-    """
-    API view to change user email.
-    """
+    """API view to change user email."""
 
     serializer_class = ChangeEmailSerializer
     queryset = User.objects.all()
