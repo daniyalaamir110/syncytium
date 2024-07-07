@@ -13,9 +13,12 @@ def validate_country_and_city(country, city):
     Args:
         `country` (`Country`): Country object.
         `city` (`City`): City object.
-    
+
     Returns:
         `Country`, `City`: Country and City objects.
+
+    Raises:
+    - `ValidationError`: If the city does not belong to the country.
     """
 
     if not country:
@@ -37,7 +40,7 @@ def send_email(subject="", message="", recipient_list=[]):
         `subject` (`str`): Email subject.
         `message` (`str`): Email message.
         `recipient_list` (`list`): List of email recipients.
-    
+
     Returns:
         `int`: Number of emails sent.
     """

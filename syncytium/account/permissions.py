@@ -8,13 +8,13 @@ from .models import UserPrivacy
 def get_privacy(username, field):
     """
     Get the privacy settings for the user and field.
-    
+
     Operations:
-    - Filter the privacy settings by the user's username, and return the 
+    - Filter the privacy settings by the user's username, and return the
     value of the provided field.
     - If the privacy settings are not found, assume public access.
 
-    Returns: 
+    Returns:
         `str`: `"PR" | "PU" | "FR"`
     """
     privacy = UserPrivacy.objects.filter(user__username=username).first()
@@ -25,8 +25,15 @@ def get_privacy(username, field):
 
 class IsCurrentUserPermission(BasePermission):
     """
-    Permission class to check if the current user is the same as the user 
+    Permission class to check if the current user is the same as the user
     in the URL.
+
+    Operations:
+    - If the current user is the same as the user in the URL, allow access.
+    - If the current user is not the same as the user in the URL, deny access.
+
+    Raises:
+    - `PermissionDenied`: If the current user is not the same as the user in the URL.
     """
 
     def has_permission(self, request, view):
@@ -40,7 +47,7 @@ class IsCurrentUserPermission(BasePermission):
 
 class IsCurrentUserOrReadOnlyPermission(IsCurrentUserPermission):
     """
-    Permission class to check if the current user is the same as the user 
+    Permission class to check if the current user is the same as the user
     in the URL. If the user is not the same, only allow read-only methods.
     """
 
@@ -53,7 +60,7 @@ class IsCurrentUserOrReadOnlyPermission(IsCurrentUserPermission):
 class CheckPrivacyPermission(BasePermission):
     """
     Permission class to check the privacy settings for a user.
-    
+
     Operations:
     - Only applies to read-only methods. For write methods, it is always `True`.
     - The `privacy_field` attribute must be defined in the view.
@@ -62,6 +69,9 @@ class CheckPrivacyPermission(BasePermission):
     - If the privacy settings are private, deny access.
     - If the privacy settings are friends, allow access only if current user
     is one of the user's friends.
+
+    Raises:
+    - `PermissionDenied`: If the current user does not have permission to access
     """
 
     def has_permission(self, request, view):
