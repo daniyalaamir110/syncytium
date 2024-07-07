@@ -96,6 +96,12 @@ class UserEmailStatus(TimeStampedModel):
         verbose_name_plural = "User email statuses"
 
 
+class Gender(models.TextChoices):
+    MALE = "M", "Male"
+    FEMALE = "F", "Female"
+    OTHER = "O", "Other"
+
+
 class UserProfile(TimeStampedModel):
     """
     This model extends the default Django user model.
@@ -109,6 +115,7 @@ class UserProfile(TimeStampedModel):
     website = models.URLField(blank=True)
     phone = models.CharField(max_length=20, blank=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True)
+    gender = models.CharField(choices=Gender.choices, max_length=1, blank=True)
 
     def __str__(self):
         return self.user.username

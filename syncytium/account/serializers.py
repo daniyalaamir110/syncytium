@@ -27,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         max_length=20,
     )
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -34,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "first_name",
             "last_name",
+            "full_name",
             "username",
             "email",
             "password",
@@ -42,11 +44,15 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name": {"required": True},
             "last_name": {"required": True},
             "email": {"required": True},
+            "full_name": {"read_only": True},
         }
 
     def validate_password(self, password):
         validate_password_django(password)
         return password
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip()
 
 
 class ChangeEmailSerializer(serializers.ModelSerializer):
