@@ -38,6 +38,7 @@ User = get_user_model()
 
 class UserCreateAPIView(CreateAPIView):
     """API view to create a new user"""
+
     serializer_class = UserSerializer
 
     def perform_create(self, serializer):

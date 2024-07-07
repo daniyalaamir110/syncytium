@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "account.apps.AccountConfig",
     "authentication.apps.AuthenticationConfig",
     "django_rest_passwordreset",
+    "user_relations.apps.UserRelationsConfig",
 ]
 
 REST_FRAMEWORK = {
