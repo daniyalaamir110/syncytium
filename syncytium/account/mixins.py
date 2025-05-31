@@ -6,8 +6,7 @@ class MustExistForUsernameAPIMixin:
     """Mixin to check if an object exists for a given username."""
 
     def get_object(self, create=False):
-        """
-        Check if the detail object exists.
+        """Check if the detail object exists.
 
         Preconditions:
         - The `model` attribute must be defined in the view.
@@ -29,4 +28,4 @@ class MustExistForUsernameAPIMixin:
         except self.model.DoesNotExist:
             if self.request.method in SAFE_METHODS or not create:
                 raise NotFound
-            return self.model(user_id=self.request.user.id)
+            return self.model.create(user_id=self.request.user.id)

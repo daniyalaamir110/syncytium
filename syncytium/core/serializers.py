@@ -1,4 +1,4 @@
-from cities_light.models import City, Country, Region
+from cities_light.models import City, Country
 from rest_framework.serializers import ModelSerializer
 
 

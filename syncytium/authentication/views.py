@@ -1,8 +1,5 @@
 from urllib.parse import urlencode
 
-from account.models import RegistrationMethod
-from account.serializers import UserSerializer
-from account.tasks import send_registration_email
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -14,6 +11,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
+
+from account.serializers import UserSerializer
+from account.tasks import send_registration_email
+from core.models import RegistrationMethod
 
 from .mixins import ApiErrorsMixin, PublicApiMixin
 from .serializers import GoogleLoginInputSerializer

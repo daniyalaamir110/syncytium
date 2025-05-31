@@ -29,8 +29,7 @@ def validate_country_and_city(country, city):
 
 
 def send_email(subject="", message="", recipient_list=[]):
-    """
-    Utility function to send an email.
+    """Utility function to send an email.
 
     Operations:
     - Use the default email host user as the sender.

@@ -1,101 +1,18 @@
-from core.models import Privacy, TimeStampedModel
-from django.contrib.auth.models import AbstractUser
+"""Account Models"""
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils import timezone
+
+from core.models import PrivatizedModel, TimeStampedModel, TokenMixin
 
 
-class RegistrationMethod(models.TextChoices):
-    """Choices for the registration method"""
-
-    EMAIL = "EM", "Email"
-    GOOGLE = "GO", "Google"
+User = get_user_model()
 
 
-class User(AbstractUser):
-    """
-    This model extends the default Django user model
-
-    Details:
-    - Overrides the email field and sets it as unique.
-    - Adds a registration method field.
-    """
-
-    email = models.EmailField(unique=True, blank=False, null=False)
-    registration_method = models.CharField(
-        choices=RegistrationMethod.choices,
-        default=RegistrationMethod.EMAIL,
-        max_length=2,
-    )
-
-    def __str__(self):
-        return self.username
-
-
-class UserPrivacy(TimeStampedModel):
-    """
-    This model stores the user privacy settings.
-
-    Initially, it only contains the user field, which is a one-to-one
-    field to the default Django user model.
-    """
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="privacy")
-    profile = models.CharField(
-        choices=Privacy.choices, default=Privacy.PUBLIC, max_length=2
-    )
-    address = models.CharField(
-        choices=Privacy.choices, default=Privacy.PUBLIC, max_length=2
-    )
-    education = models.CharField(
-        choices=Privacy.choices, default=Privacy.PUBLIC, max_length=2
-    )
-    work_experience = models.CharField(
-        choices=Privacy.choices, default=Privacy.PUBLIC, max_length=2
-    )
-
-    class Meta:
-        verbose_name_plural = "User privacies"
-
-    def __str__(self):
-        return f"{self.user.username} privacy settings"
-
-
-EMAIL_TOKEN_VALIDITY = 1
-
-
-class UserEmailStatus(TimeStampedModel):
-    """
-    This model stores the user email status.
-
-    Initially, it only contains the user field, which is a one-to-one
-    field to the default Django user model.
-    """
-
+class UserEmailStatus(TimeStampedModel, TokenMixin):
+    """This model stores the user email status"""
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="email_status"
     )
-    is_verified = models.BooleanField(default=False)
-    verification_token = models.CharField(max_length=32, blank=True)
-
-    @property
-    def is_valid(self):
-        """
-        Check if the email status is valid.
-
-        Operations:
-        - Token is invalid if already verified.
-        - Token is invalid if it is expired.
-
-        Returns:
-            `bool`: `True` if the token is valid, `False` otherwise.
-        """
-        if not self.is_verified:
-            created = self.created
-            now = timezone.now()
-            if (now - created).days < EMAIL_TOKEN_VALIDITY:
-                return True
-        return False
 
     def __str__(self):
         return f"{self.user.username} email status"
@@ -106,40 +23,56 @@ class UserEmailStatus(TimeStampedModel):
 
 class Gender(models.TextChoices):
     """Choices for user's gender"""
-
     MALE = "M", "Male"
     FEMALE = "F", "Female"
     OTHER = "O", "Other"
 
 
 class UserProfile(TimeStampedModel):
-    """
-    This model stores the user profile information
-
-    Initially, it only contains the user field, which is a one-to-one
-    field to the default Django user model.
-    """
-
+    """This model stores the user profile information"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     bio = models.TextField(blank=True)
-    birth_date = models.DateField(null=True, blank=True, verbose_name="Date of birth")
-    website = models.URLField(blank=True)
-    phone = models.CharField(max_length=20, blank=True)
-    avatar = models.ImageField(upload_to="avatars/", blank=True)
     gender = models.CharField(choices=Gender.choices, max_length=1, blank=True)
 
     def __str__(self):
         return self.user.username
 
 
-class UserAddress(TimeStampedModel):
-    """
-    This model stores the user address.
+class UserBirthDate(TimeStampedModel, PrivatizedModel):
+    """This model stores the user's birth date"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_birth_date")
+    birth_date = models.DateField(null=True, blank=True, verbose_name="Date of birth")
 
-    Initially, it only contains the user field, which is a one-to-one
-    field to the default Django user model.
-    """
 
+class UserLink(TimeStampedModel, PrivatizedModel):
+    """This model stores the user's links"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_links")
+    link = models.URLField(blank=True)
+
+
+class UserPhone(TimeStampedModel, PrivatizedModel):
+    """This model stores the user's links. Only one phone can be set
+    as primary.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_phones")
+    phone = models.CharField(max_length=20, blank=True)
+    is_primary = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_primary:
+            UserPhone.objects.filter(user=self.user, is_primary=True) \
+                .exclude(pk=self.pk).update(is_primary=False)
+
+
+class UserAvatar(TimeStampedModel, PrivatizedModel):
+    """This model stores the user's avatar image"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_avatar")
+    birth_date = models.DateField(null=True, blank=True, verbose_name="Date of birth")
+
+
+class UserAddress(TimeStampedModel, PrivatizedModel):
+    """This model stores the user address"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="address")
     country = models.ForeignKey(
         "cities_light.Country", on_delete=models.SET_NULL, null=True, blank=True
@@ -152,17 +85,11 @@ class UserAddress(TimeStampedModel):
         verbose_name_plural = "User addresses"
 
     def __str__(self):
-        return f"{self.user.username} lives in {self.city.name}, {self.country.name}"
+        return f"{self.user.username} – {self.city}, {self.country}"
 
 
-class UserEducation(TimeStampedModel):
-    """
-    This model stores the user education information.
-
-    Initially, it only contains the user field, which is a one-to-one
-    field to the default Django user model.
-    """
-
+class UserEducation(TimeStampedModel, PrivatizedModel):
+    """This model stores the user education information"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="educations")
     school = models.CharField(max_length=255)
     degree = models.CharField(max_length=255)
@@ -175,14 +102,8 @@ class UserEducation(TimeStampedModel):
         return f"{self.user.username} studied {self.field_of_study} at {self.school}"
 
 
-class UserWorkExperience(TimeStampedModel):
-    """
-    This model stores the user work experience information.
-
-    Initially, it only contains the user field, which is a one-to-one
-    field to the default Django user model.
-    """
-
+class UserWorkExperience(TimeStampedModel, PrivatizedModel):
+    """This model stores the user work experience information"""
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="work_experiences"
     )

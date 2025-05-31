@@ -4,8 +4,7 @@ from .models import UserEmailStatus
 
 
 def generate_email_verification_token(user_id):
-    """
-    Generate an email verification token for the user
+    """Generate an email verification token for the user
 
     Operation:
         Whenever a user changes their email address, a new token is generated,

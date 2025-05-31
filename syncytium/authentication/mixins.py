@@ -20,9 +20,9 @@ class PublicApiMixin:
 
 
 class ApiErrorsMixin:
-    """
-    Mixin that transforms Django and Python exceptions into rest_framework ones.
-    Without the mixin, they return 500 status code which is not desired.
+    """Mixin that transforms Django and Python exceptions into 
+    rest_framework ones. Without the mixin, they return 500 status 
+    code which is not desired.
     """
 
     expected_exceptions = {
