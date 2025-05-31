@@ -17,8 +17,7 @@ class GoogleOAuthUtils:
 
     @classmethod
     def get_access_token(cls, code, redirect_uri):
-        """
-        Get access token from Google using the given code
+        """Get access token from Google using the given code
         
         Args:
             `code` (`str`): The code obtained from Google
@@ -44,8 +43,7 @@ class GoogleOAuthUtils:
 
     @classmethod
     def get_user_info(cls, access_token):
-        """
-        Get user info from Google using the given access token
+        """Get user info from Google using the given access token
         
         Args:
             `access_token` (`str`): The access token obtained from Google
@@ -62,8 +60,7 @@ class GoogleOAuthUtils:
 
 
 def generate_username_from_email(email):
-    """
-    Generate a username from the given email
+    """Generate a username from the given email
 
     Operations:
     - The username is the prefix of the email address.
@@ -87,8 +84,7 @@ def generate_username_from_email(email):
 
 
 def get_error_message(exc):
-    """
-    Get the error message from the given exception.
+    """Get the error message from the given exception.
 
     Args:
         `exc` (`Exception`): The exception
@@ -100,8 +96,7 @@ def get_error_message(exc):
 
 
 def generate_tokens_for_user(user):
-    """
-    Generate access and refresh tokens for the given user.
+    """Generate access and refresh tokens for the given user.
 
     Operations:
     - Use the `TokenObtainPairSerializer` to generate the tokens.

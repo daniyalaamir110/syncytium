@@ -127,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = "account.User"
+AUTH_USER_MODEL = "core.User"
 
 
 # Internationalization
@@ -167,7 +167,8 @@ SIMPLE_JWT = {
 }
 
 # Email server configuration
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 EMAIL_HOST = "smtp.gmail.com"
@@ -178,3 +179,7 @@ EMAIL_USE_TLS = True
 BASE_FRONTEND_URL = config("BASE_FRONTEND_URL", "http://localhost:3000")
 GOOGLE_OAUTH2_CLIENT_ID = config("GOOGLE_OAUTH2_CLIENT_ID")
 GOOGLE_OAUTH2_CLIENT_SECRET = config("GOOGLE_OAUTH2_CLIENT_SECRET")
+
+
+# Token
+TOKEN_VALIDITY = 1 # days

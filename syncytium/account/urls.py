@@ -1,15 +1,9 @@
 from django.urls import path, re_path
 
 from .views import (
-    UserAddressAPIView,
-    UserChangeEmailAPIView,
-    UserCreateAPIView,
-    UserEducationViewSet,
-    UserPrivacyAPIView,
-    UserProfileAPIView,
-    UserWorkExperienceViewSet,
-    get_email_token,
-    verify_email,
+    UserAddressAPIView, UserChangeEmailAPIView, UserCreateAPIView, 
+    UserEducationViewSet, UserProfileAPIView, UserWorkExperienceViewSet,
+    get_email_token, verify_email,
 )
 
 app_name = "account"
@@ -30,11 +24,6 @@ urlpatterns = [
         r"(?P<username>[\w.@+-]+)/change-email/$",
         UserChangeEmailAPIView.as_view(),
         name="change_email",
-    ),
-    re_path(
-        r"(?P<username>[\w.@+-]+)/privacy/$",
-        UserPrivacyAPIView.as_view(),
-        name="user_privacy",
     ),
     re_path(
         r"(?P<username>[\w.@+-]+)/profile/$",

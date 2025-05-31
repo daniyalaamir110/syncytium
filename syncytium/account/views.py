@@ -7,29 +7,19 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ModelViewSet
 
+from core.models import RegistrationMethod
+
 from .mixins import MustExistForUsernameAPIMixin
 from .models import (
-    RegistrationMethod,
-    UserAddress,
-    UserEducation,
-    UserEmailStatus,
-    UserPrivacy,
-    UserProfile,
+    UserAddress, UserEducation, UserEmailStatus, UserProfile,
     UserWorkExperience,
 )
 from .permissions import (
-    CheckPrivacyPermission,
-    IsCurrentUserOrReadOnlyPermission,
-    IsCurrentUserPermission,
+    IsCurrentUserOrReadOnlyPermission, IsCurrentUserPermission,
 )
 from .serializers import (
-    ChangeEmailSerializer,
-    UserAddressSerializer,
-    UserEducationSerializer,
-    UserPrivacySerializer,
-    UserProfileSerializer,
-    UserSerializer,
-    UserWorkExperienceSerializer,
+    ChangeEmailSerializer, UserAddressSerializer, UserEducationSerializer, 
+    UserProfileSerializer, UserSerializer, UserWorkExperienceSerializer,
 )
 from .tasks import send_email_verification_link_email, send_registration_email
 
@@ -46,8 +36,10 @@ class UserCreateAPIView(CreateAPIView):
         user = serializer.instance
         user.set_password(password)
         user.save()
-        send_registration_email.delay(user.id)
-        send_email_verification_link_email.delay(user.id, is_new=True)
+        # send_registration_email.delay(user.id)
+        send_registration_email(user.id)
+        # send_email_verification_link_email.delay(user.id, is_new=True)
+        send_email_verification_link_email(user.id, is_new=True)
         return user
 
 
@@ -62,7 +54,8 @@ def get_email_token(request, username):
         return Response(
             {"detail": "Email is already verified."}, status=HTTP_400_BAD_REQUEST
         )
-    send_email_verification_link_email.delay(user.id)
+    # send_email_verification_link_email.delay(user.id)
+    send_email_verification_link_email(user.id)
     return Response(
         {"detail": "Email verification link will be sent to you soon."},
         status=HTTP_200_OK,
@@ -77,7 +70,7 @@ def verify_email(request, token):
         detail = "Invalid link"
     elif email_status.is_verified:
         detail = "Email is already verified."
-    elif not email_status.is_valid:
+    elif not email_status.is_token_valid:
         detail = "Link expired. Please generate a new link."
     else:
         detail = "Email verified successfully."
@@ -88,7 +81,6 @@ def verify_email(request, token):
 
 class UserChangeEmailAPIView(UpdateAPIView):
     """API view to change user email."""
-
     serializer_class = ChangeEmailSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsCurrentUserPermission]
@@ -105,24 +97,20 @@ class UserChangeEmailAPIView(UpdateAPIView):
                 status=HTTP_400_BAD_REQUEST,
             )
         super().perform_update(serializer)
-        send_email_verification_link_email.delay(user.id)
+        # send_email_verification_link_email.delay(user.id)
+        send_email_verification_link_email(user.id)
         return user
 
 
 class UserProfileAPIView(RetrieveUpdateAPIView):
-    """
-    API view to manage user profile.
-    """
-
+    """API view to manage user profile"""
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         IsCurrentUserOrReadOnlyPermission,
-        CheckPrivacyPermission,
     ]
     http_method_names = ["get", "patch"]
-    privacy_field = "profile"
     model = UserProfile
 
     def get_object(self):
@@ -130,56 +118,28 @@ class UserProfileAPIView(RetrieveUpdateAPIView):
 
 
 class UserAddressAPIView(RetrieveUpdateAPIView):
-    """
-    API view to manage user address.
-    """
-
+    """API view to manage user address"""
     serializer_class = UserAddressSerializer
     queryset = UserAddress.objects.all()
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         IsCurrentUserOrReadOnlyPermission,
-        CheckPrivacyPermission,
     ]
     http_method_names = ["get", "patch"]
-    privacy_field = "address"
     model = UserAddress
 
     def get_object(self):
         return MustExistForUsernameAPIMixin.get_object(self, create=True)
 
 
-class UserPrivacyAPIView(RetrieveUpdateAPIView):
-    """
-    API view to manage user privacy settings.
-    """
-
-    serializer_class = UserPrivacySerializer
-    queryset = UserPrivacy.objects.all()
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        IsCurrentUserOrReadOnlyPermission,
-    ]
-    http_method_names = ["get", "patch"]
-    model = UserPrivacy
-
-    def get_object(self):
-        return MustExistForUsernameAPIMixin.get_object(self, create=True)
-
-
 class UserEducationViewSet(ModelViewSet):
-    """
-    API view to manage user education.
-    """
-
+    """API view to manage user education"""
     serializer_class = UserEducationSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         IsCurrentUserOrReadOnlyPermission,
-        CheckPrivacyPermission,
     ]
     http_method_names = ["get", "post", "patch", "delete"]
-    privacy_field = "education"
     model = UserEducation
 
     def get_queryset(self):
@@ -191,18 +151,14 @@ class UserEducationViewSet(ModelViewSet):
 
 
 class UserWorkExperienceViewSet(ModelViewSet):
-    """
-    API view to manage user work experience.
-    """
+    """API view to manage user work experience"""
 
     serializer_class = UserWorkExperienceSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         IsCurrentUserOrReadOnlyPermission,
-        CheckPrivacyPermission,
     ]
     http_method_names = ["get", "post", "patch", "delete"]
-    privacy_field = "work_experience"
     model = UserWorkExperience
 
     def get_queryset(self):
